@@ -6,19 +6,20 @@ use Symfony\Component\Process\Process;
 class ProcessHelper {
 
   /**
-   * Helper which synchronously runs a command and verifies that it doesn't generate an error.
+   * Run a command synchronously.
    *
    * @param \Symfony\Component\Process\Process|string|array $process
    *   Ex: 'echo "Hello world"'
    *   Ex: ['echo @MSG', 'MSG' => 'Hello world']
    * @return \Symfony\Component\Process\Process
    * @throws \RuntimeException
+   * @see interpolate
    */
-  public static function runDebug($process) {
+  public static function run($process) {
     $process = self::castToProcess($process);
     if (getenv('DEBUG') > 0) {
       printf("RUN: %s\n    (in %s)\n", $process->getCommandLine(), $process->getWorkingDirectory());
-      //      ob_flush();
+      // ob_flush();
     }
 
     $process->run(function ($type, $buffer) {
@@ -37,17 +38,18 @@ class ProcessHelper {
   }
 
   /**
-   * Helper which synchronously runs a command and verifies that it doesn't generate an error.
+   * Run a command synchronously. Assert successful execution.
    *
    * @param \Symfony\Component\Process\Process|string|array $process
    *   Ex: 'echo "Hello world"'
    *   Ex: ['echo @MSG', 'MSG' => 'Hello world']
    * @return \Symfony\Component\Process\Process
    * @throws \RuntimeException
+   * @see self::interpolate()
    */
   public static function runOk($process) {
     $process = self::castToProcess($process);
-    self::runDebug($process);
+    self::run($process);
     if (!$process->isSuccessful()) {
       throw new ProcessErrorException($process);
     }
@@ -55,6 +57,8 @@ class ProcessHelper {
   }
 
   /**
+   * Print information about a command to screen.
+   *
    * @param \Symfony\Component\Process\Process|string|array $process
    */
   public static function dump($process) {
@@ -63,6 +67,8 @@ class ProcessHelper {
   }
 
   /**
+   * Format a detailed summary about the process.
+   *
    * @param \Symfony\Component\Process\Process|string|array $process
    * @return string
    */
@@ -131,12 +137,12 @@ class ProcessHelper {
   }
 
   /**
+   * Convert from various formats to a Process object.
+   *
    * @param string|array|Process $process
-   *   Ex: 'echo "Hello world"'
-   *   Ex: ['echo @MSG', 'MSG' => 'Hello world']
    * @return \Symfony\Component\Process\Process
    */
-  protected static function castToProcess($process) {
+  public static function castToProcess($process) {
     if ($process instanceof Process) {
       return $process;
     }
