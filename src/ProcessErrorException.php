@@ -11,7 +11,6 @@ class ProcessErrorException extends \RuntimeException {
     $this->process = $process;
     if (empty($message)) {
       $message = $this->createReport($process);
-//      $message = "======({$process->getCommandLine()})";
     }
     parent::__construct($message, $code, $previous);
   }
@@ -31,17 +30,7 @@ class ProcessErrorException extends \RuntimeException {
   }
 
   public function createReport($process) {
-    return "Process failed:
-
-[[ COMMAND: {$process->getCommandLine()} ]]
-[[ CWD: {$process->getWorkingDirectory()} ]]
-[[ EXIT CODE: {$process->getExitCode()} ]]
-[[ STDOUT ]]
-{$process->getOutput()}
-[[ STDERR ]]
-{$process->getErrorOutput()}
-
-      ";
+    return "Process failed:\n" . ProcessHelper::createReport($process);
   }
 
 }

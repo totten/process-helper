@@ -1,7 +1,6 @@
 <?php
 namespace ProcessHelper;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+
 use Symfony\Component\Process\Process;
 
 class ProcessHelper {
@@ -11,17 +10,14 @@ class ProcessHelper {
    *
    * @param \Symfony\Component\Process\Process|string|array $process
    *   Ex: 'echo "Hello world"'
-   *   Ex: ['echo "@msg"', 'msg' => 'Hello world']
+   *   Ex: ['echo @MSG', 'MSG' => 'Hello world']
    * @return \Symfony\Component\Process\Process
    * @throws \RuntimeException
    */
   public static function runDebug($process) {
     $process = self::castToProcess($process);
     if (getenv('DEBUG') > 0) {
-      var_dump(array(
-        'Working Directory' => $process->getWorkingDirectory(),
-        'Command' => $process->getCommandLine(),
-      ));
+      printf("RUN: %s\n    (in %s)\n", $process->getCommandLine(), $process->getWorkingDirectory());
       //      ob_flush();
     }
 
@@ -45,7 +41,7 @@ class ProcessHelper {
    *
    * @param \Symfony\Component\Process\Process|string|array $process
    *   Ex: 'echo "Hello world"'
-   *   Ex: ['echo "@msg"', 'msg' => 'Hello world']
+   *   Ex: ['echo @MSG', 'MSG' => 'Hello world']
    * @return \Symfony\Component\Process\Process
    * @throws \RuntimeException
    */
@@ -63,13 +59,24 @@ class ProcessHelper {
    */
   public static function dump($process) {
     $process = self::castToProcess($process);
-    var_dump(array(
-      'Working Directory' => $process->getWorkingDirectory(),
-      'Command' => $process->getCommandLine(),
-      'Exit Code' => $process->getExitCode(),
-      'Output' => $process->getOutput(),
-      'Error Output' => $process->getErrorOutput(),
-    ));
+    echo self::createReport($process);
+  }
+
+  /**
+   * @param \Symfony\Component\Process\Process|string|array $process
+   * @return string
+   */
+  public static function createReport($process) {
+    $process = self::castToProcess($process);
+    return "[[ COMMAND: {$process->getCommandLine()} ]]
+[[ CWD: {$process->getWorkingDirectory()} ]]
+[[ EXIT CODE: {$process->getExitCode()} ]]
+[[ STDOUT ]]
+{$process->getOutput()}
+[[ STDERR ]]
+{$process->getErrorOutput()}
+
+";
   }
 
   /**
@@ -126,7 +133,7 @@ class ProcessHelper {
   /**
    * @param string|array|Process $process
    *   Ex: 'echo "Hello world"'
-   *   Ex: ['echo "@msg"', 'msg' => 'Hello world']
+   *   Ex: ['echo @MSG', 'MSG' => 'Hello world']
    * @return \Symfony\Component\Process\Process
    */
   protected static function castToProcess($process) {
