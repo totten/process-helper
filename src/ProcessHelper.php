@@ -147,12 +147,12 @@ class ProcessHelper {
       return $process;
     }
     if (is_string($process)) {
-      return new Process($process);
+      return new Process($process, NULL, NULL, NULL, NULL);
     }
     if (is_array($process)) {
       $cmd = $process[0];
       unset($process[0]);
-      return new Process(self::interpolate($cmd, $process));
+      return new Process(self::interpolate($cmd, $process), NULL, NULL, NULL, NULL);
     }
     throw new \RuntimeException("Cannot cast item to process");
   }
