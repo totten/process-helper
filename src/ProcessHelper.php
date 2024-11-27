@@ -101,7 +101,7 @@ class ProcessHelper {
       return $expr;
     }
     else {
-      return preg_replace_callback('/([#!@])([a-zA-Z0-9_]+)/', function($m) use ($args) {
+      return preg_replace_callback('/([#!@])([a-zA-Z0-9_]+)/', function ($m) use ($args) {
         if (isset($args[$m[2]])) {
           $values = $args[$m[2]];
         }
@@ -146,13 +146,25 @@ class ProcessHelper {
     if ($process instanceof Process) {
       return $process;
     }
+
+    if (is_callable([Process::class, 'fromShellCommandline'])) {
+      $newProcess = function ($cmd) {
+        return Process::fromShellCommandline($cmd, NULL, NULL, NULL, NULL);
+      };
+    }
+    else {
+      $newProcess = function ($cmd) {
+        return new Process($cmd, NULL, NULL, NULL, NULL);
+      };
+    }
+
     if (is_string($process)) {
-      return new Process($process, NULL, NULL, NULL, NULL);
+      return $newProcess($process);
     }
     if (is_array($process)) {
       $cmd = $process[0];
       unset($process[0]);
-      return new Process(self::interpolate($cmd, $process), NULL, NULL, NULL, NULL);
+      return $newProcess(self::interpolate($cmd, $process));
     }
     throw new \RuntimeException("Cannot cast item to process");
   }
